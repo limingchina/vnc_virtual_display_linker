@@ -35,9 +35,20 @@
 # =======================
 PC_MONITOR_WIDTH = 1920
 PC_MONITOR_LENGTH = 1080
-VIRTUAL_MONITOR_WIDTH = 1280
-VIRTUAL_MONITOR_LENGTH = 800
+VIRTUAL_MONITOR_WIDTH = 1600
+VIRTUAL_MONITOR_LENGTH = 900
 
+# =======================
+#     Argument parsing
+# =======================
+import argparse
+
+parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+
+parser.add_argument('--vsize', default="1600x900", help='Virtual monitor size: [width]x[height]')
+parser.add_argument('--placement', default="left", help="Virtual monitor's placement: left or right")
+args = parser.parse_args()
+VIRTUAL_MONITOR_WIDTH, VIRTUAL_MONITOR_LENGTH = args.vsize.split('x')
 
 # =======================
 
@@ -88,7 +99,7 @@ class ScreenManager:
         self.conf.state.is_monitor_created = False
 
     def start_vnc(self):
-        os.system("x11vnc -usepw -nocursorshape -nocursorpos -noxinerama -solid -repeat -forever -clip " + self.conf.state.x11vnc_clip)
+        os.system("x11vnc -rfbport 5902 -usepw -nocursorshape -nocursorpos -noxinerama -solid -repeat -forever -clip " + self.conf.state.x11vnc_clip)
 
     def toggle_orientation(self):
         self.delete_monitor()
@@ -118,7 +129,9 @@ class ScreenManager:
         return re.sub(r'.*(".*").*', r'\1', mode_data)
 
     def get_clip_param(self, width, length, pc_monitor_width):
-        return "{0}x{1}+{2}+0".format(width, length, pc_monitor_width)
+        return args.placement==left ?
+            "{0}x{1}+0+0".format(width, length) :
+            "{0}x{1}+{2}+0".format(width, length, pc_monitor_width)
 
     def set_xrandr_mode_and_x11vnc_clip(self, width, length):
         self.conf.state.xrandr_mode.data = self.get_xrandr_mode_data( width, length)
@@ -192,4 +205,5 @@ menu_actions = {
 # Main Program
 if __name__ == "__main__":
     # Launch main menu
+    quit()
     main_menu()
