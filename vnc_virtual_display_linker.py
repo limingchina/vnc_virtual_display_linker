@@ -35,8 +35,6 @@
 # =======================
 PC_MONITOR_WIDTH = 1920
 PC_MONITOR_LENGTH = 1080
-VIRTUAL_MONITOR_WIDTH = 1600
-VIRTUAL_MONITOR_LENGTH = 900
 
 # =======================
 #     Argument parsing
@@ -49,6 +47,13 @@ parser.add_argument('--vsize', default="1600x900", help='Virtual monitor size: [
 parser.add_argument('--placement', default="left", help="Virtual monitor's placement: left or right")
 args = parser.parse_args()
 VIRTUAL_MONITOR_WIDTH, VIRTUAL_MONITOR_LENGTH = args.vsize.split('x')
+if not(VIRTUAL_MONITOR_WIDTH.isdecimal()) or not(VIRTUAL_MONITOR_LENGTH.isdecimal()) :
+    print("Virtual monitor size should be specified in the form of [width]x[height]")
+    quit()
+
+if args.placement != "left" and args.placement != "right" :
+    print("Virtual monitor placement should be either 'left' or 'right'")
+    quit()
 
 # =======================
 
@@ -129,9 +134,8 @@ class ScreenManager:
         return re.sub(r'.*(".*").*', r'\1', mode_data)
 
     def get_clip_param(self, width, length, pc_monitor_width):
-        return args.placement==left ?
-            "{0}x{1}+0+0".format(width, length) :
-            "{0}x{1}+{2}+0".format(width, length, pc_monitor_width)
+        return ("{0}x{1}+0+0".format(width, length) if args.placement == "left"
+                else "{0}x{1}+{2}+0".format(width, length, pc_monitor_width))
 
     def set_xrandr_mode_and_x11vnc_clip(self, width, length):
         self.conf.state.xrandr_mode.data = self.get_xrandr_mode_data( width, length)
@@ -205,5 +209,4 @@ menu_actions = {
 # Main Program
 if __name__ == "__main__":
     # Launch main menu
-    quit()
     main_menu()
